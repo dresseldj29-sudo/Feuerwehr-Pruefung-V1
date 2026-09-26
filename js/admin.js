@@ -1,85 +1,177 @@
-<!DOCTYPE html>
-<html lang="de">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Admin – Feuerwehr Prüfung</title>
-
-    <link rel="stylesheet" href="css/style.css">
-
-</head>
-
-<body>
-
-<header class="topbar">
-
-    <div class="logo">
-        🚒 Feuerwehr Prüfung
-    </div>
-
-    <nav>
-        <a href="index.html">Start</a>
-    </nav>
-
-</header>
+const API_URL =
+    localStorage.getItem("API_URL") || "";
 
 
-<main class="admin-page">
+async function loadPruefungen() {
 
-<div class="admin-container">
-
-    <div class="badge">
-        🔐 ADMIN-BEREICH
-    </div>
-
-    <h1>
-        Prüfungen verwalten
-    </h1>
-
-    <p>
-        Erstelle Prüfungen aus deinem Unterrichtsmaterial
-        und verwalte anschließend die Ergebnisse.
-    </p>
+    const container =
+        document.getElementById("pruefungen");
 
 
-    <div class="admin-actions">
+    if (!API_URL) {
 
-        <a
-            href="erstellen.html"
-            class="button primary"
-        >
-            🤖 Prüfung mit KI erstellen
-        </a>
+        container.innerHTML = `
 
-    </div>
+            <div class="feature">
 
+                <h2>
+                    ⚠️ Backend noch nicht verbunden
+                </h2>
 
-    <h2 class="section-title">
-        Meine Prüfungen
-    </h2>
+                <p>
+                    Die Website ist installiert.
+                    Sobald das Backend verbunden ist,
+                    erscheinen hier deine Prüfungen.
+                </p>
 
+            </div>
 
-    <div id="pruefungen">
+        `;
 
-        <div class="loading">
-            Prüfungen werden geladen...
-        </div>
-
-    </div>
-
-</div>
-
-</main>
+        return;
+    }
 
 
-<script src="js/admin.js"></script>
+    try {
 
-</body>
-</html>
+        const response =
+            await fetch(
+                API_URL + "/api/pruefungen"
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error || "Serverfehler"
+            );
+
+        }
+
+
+        if (!data.length) {
+
+            container.innerHTML = `
+
+                <div class="feature">
+
+                    <h2>
+                        Noch keine Prüfungen
+                    </h2>
+
+                    <p>
+                        Erstelle deine erste Prüfung.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML = "";
+
+
+        data.forEach(pruefung => {
+
+            const div =
+                document.createElement("div");
+
+
+            div.className = "feature";
+
+
+            div.innerHTML = `
+
+                <h2>
+                    ${escapeHTML(pruefung.titel)}
+                </h2>
+
+                <p>
+                    Prüfungs-Code:
+                    <strong>
+                        ${escapeHTML(pruefung.code)}
+                    </strong>
+                </p>
+
+                <p>
+                    Fragen:
+                    ${pruefung.fragen_anzahl}
+                </p>
+
+                <p>
+                    Erstellt:
+                    ${escapeHTML(pruefung.erstellt_am)}
+                </p>
+
+                <br>
+
+                <a
+                    class="button primary small-button"
+                    href="pruefung.html?code=${encodeURIComponent(pruefung.code)}"
+                >
+                    🔗 Prüfung öffnen
+                </a>
+
+                <a
+                    class="button secondary small-button"
+                    href="auswertung.html?id=${pruefung.id}"
+                >
+                    📊 Auswertung
+                </a>
+
+            `;
+
+
+            container.appendChild(div);
+
+        });
+
+
+    } catch (error) {
+
+        container.innerHTML = `
+
+            <div class="feature">
+
+                <h2>
+                    ❌ Fehler
+                </h2>
+
+                <p>
+                    ${escapeHTML(error.message)}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
+
+}
+
+
+loadPruefungen();
