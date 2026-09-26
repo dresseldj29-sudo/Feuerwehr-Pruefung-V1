@@ -1,120 +1,85 @@
-const API_URL = localStorage.getItem("API_URL") || "";
+<!DOCTYPE html>
+<html lang="de">
 
-async function loadPruefungen() {
+<head>
 
-    const container =
-        document.getElementById("pruefungen");
+    <meta charset="UTF-8">
 
-    if (!API_URL) {
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-        container.innerHTML = `
-            <div class="feature">
+    <title>Admin – Feuerwehr Prüfung</title>
 
-                <h2>Backend noch nicht verbunden</h2>
+    <link rel="stylesheet" href="css/style.css">
 
-                <p>
-                    Das Frontend funktioniert bereits.
-                    Nach Einrichtung des Backends werden
-                    hier deine Prüfungen angezeigt.
-                </p>
+</head>
 
-            </div>
-        `;
+<body>
 
-        return;
-    }
+<header class="topbar">
 
-    try {
+    <div class="logo">
+        🚒 Feuerwehr Prüfung
+    </div>
 
-        const response =
-            await fetch(API_URL + "/api/pruefungen");
+    <nav>
+        <a href="index.html">Start</a>
+    </nav>
 
-        if (!response.ok) {
-            throw new Error("Serverfehler");
-        }
-
-        const data = await response.json();
-
-        if (!data.length) {
-
-            container.innerHTML = `
-                <div class="feature">
-                    <h2>Noch keine Prüfungen</h2>
-                    <p>
-                        Erstelle deine erste Prüfung.
-                    </p>
-                </div>
-            `;
-
-            return;
-        }
-
-        container.innerHTML = "";
-
-        data.forEach(pruefung => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "feature";
-
-            div.innerHTML = `
-
-                <h2>
-                    ${escapeHTML(pruefung.titel)}
-                </h2>
-
-                <p>
-                    Code:
-                    <strong>
-                        ${escapeHTML(pruefung.code)}
-                    </strong>
-                </p>
-
-                <br>
-
-                <a
-                    class="button primary"
-                    href="auswertung.html?id=${pruefung.id}"
-                >
-                    📊 Auswertung
-                </a>
-
-            `;
-
-            container.appendChild(div);
-
-        });
-
-    } catch (error) {
-
-        container.innerHTML = `
-            <div class="feature">
-
-                <h2>⚠️ Server nicht erreichbar</h2>
-
-                <p>
-                    Bitte überprüfe die Backend-Verbindung.
-                </p>
-
-            </div>
-        `;
-
-    }
-
-}
+</header>
 
 
-function escapeHTML(value) {
+<main class="admin-page">
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+<div class="admin-container">
 
-}
+    <div class="badge">
+        🔐 ADMIN-BEREICH
+    </div>
+
+    <h1>
+        Prüfungen verwalten
+    </h1>
+
+    <p>
+        Erstelle Prüfungen aus deinem Unterrichtsmaterial
+        und verwalte anschließend die Ergebnisse.
+    </p>
 
 
-loadPruefungen();
+    <div class="admin-actions">
+
+        <a
+            href="erstellen.html"
+            class="button primary"
+        >
+            🤖 Prüfung mit KI erstellen
+        </a>
+
+    </div>
+
+
+    <h2 class="section-title">
+        Meine Prüfungen
+    </h2>
+
+
+    <div id="pruefungen">
+
+        <div class="loading">
+            Prüfungen werden geladen...
+        </div>
+
+    </div>
+
+</div>
+
+</main>
+
+
+<script src="js/admin.js"></script>
+
+</body>
+</html>
