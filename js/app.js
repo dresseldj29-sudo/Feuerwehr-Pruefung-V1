@@ -1,7 +1,12 @@
+function getApiUrl() {
+    return localStorage.getItem("API_URL") || "";
+}
+
+
 function openExam() {
 
     const code = prompt(
-        "Bitte gib den Prüfungs-Code ein:"
+        "Bitte Prüfungs-Code eingeben:"
     );
 
     if (!code) {
