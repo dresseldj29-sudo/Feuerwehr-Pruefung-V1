@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Prüfungsergebnis</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        🚒 Prüfungsergebnis
+    </div>
+
+</header>
+
+
+<main class="admin-page">
+
+<div class="admin-container">
+
+    <div class="badge">
+        📊 ERGEBNIS
+    </div>
+
+    <h1>
+        Deine Prüfung
+    </h1>
+
+    <div
+        id="result"
+        class="feature"
+    >
+        Ergebnis wird geladen...
+    </div>
+
+</div>
+
+</main>
+
+
+<script>
+
+const API_URL =
+    localStorage.getItem("API_URL") || "";
+
+const params =
+    new URLSearchParams(window.location.search);
+
+const id =
+    params.get("id");
+
+
+async function loadResult() {
+
+    if (!API_URL) {
+
+        document.getElementById("result")
+            .innerHTML =
+            "Backend nicht verbunden.";
+
+        return;
+
+    }
+
+
+    const response =
+        await fetch(
+            API_URL +
+            "/api/teilnehmer/" +
+            encodeURIComponent(id)
+        );
+
+
+    const data =
+        await response.json();
+
+
+    document.getElementById("result")
+        .innerHTML = `
+
+            <h2>
+                ${escapeHTML(data.vorname)}
+                ${escapeHTML(data.nachname)}
+            </h2>
+
+            <p>
+                Feuerwehr:
+                ${escapeHTML(data.feuerwehr)}
+            </p>
+
+            <br>
+
+            <h1>
+                ${data.prozent} %
+            </h1>
+
+            <p>
+                ${data.punkte}
+                / ${data.maxPunkte}
+                Punkte
+            </p>
+
+            <br>
+
+            <h2>
+                ${
+                    data.bestanden
+                    ? "🟢 BESTANDEN"
+                    : "🔴 NICHT BESTANDEN"
+                }
+            </h2>
+
+        `;
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+loadResult();
+
+</script>
+
+</body>
+</html>
