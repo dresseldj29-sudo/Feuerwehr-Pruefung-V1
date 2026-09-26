@@ -1,85 +1,319 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Admin – Feuerwehr Prüfung</title>
+    <title>Admin – Feuerwehr Prüfungsplattform</title>
 
     <link rel="stylesheet" href="css/style.css">
 
+    <style>
+        .admin-login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-login {
+            width: 100%;
+            max-width: 430px;
+            background: #171717;
+            border: 1px solid #333;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .admin-login-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #b30000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+        }
+
+        .admin-login h1 {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .admin-login p {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .admin-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 16px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .admin-input:focus {
+            border-color: #e00000;
+        }
+
+        .admin-login-button {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            background: #c00000;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .admin-login-button:hover {
+            background: #e00000;
+        }
+
+        .login-error {
+            display: none;
+            background: #4d0000;
+            color: #ffb3b3;
+            border: 1px solid #8b0000;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #adminBereich {
+            display: none;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .admin-header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: white;
+            background: #b00000;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .admin-button:hover {
+            background: #df0000;
+        }
+
+        .admin-button.secondary {
+            background: #333;
+        }
+
+        .admin-button.secondary:hover {
+            background: #444;
+        }
+
+        .admin-card {
+            background: #171717;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .admin-card h3 {
+            margin-top: 0;
+        }
+
+        .admin-card-info {
+            color: #aaa;
+            margin: 7px 0;
+        }
+
+        .admin-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .empty-admin {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .loading-admin {
+            text-align: center;
+            color: #aaa;
+            padding: 40px;
+        }
+
+        .admin-status {
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .admin-status.error {
+            display: block;
+            background: #4d0000;
+            color: #ffb3b3;
+        }
+
+        .admin-status.success {
+            display: block;
+            background: #103d20;
+            color: #a8ffbd;
+        }
+    </style>
 </head>
 
 <body>
 
-<header class="topbar">
+    <!-- ============================= -->
+    <!-- ADMIN LOGIN -->
+    <!-- ============================= -->
 
-    <div class="logo">
-        🚒 Feuerwehr Prüfung
-    </div>
+    <div id="loginBereich" class="admin-login-wrapper">
 
-    <nav>
-        <a href="index.html">Start</a>
-    </nav>
+        <div class="admin-login">
 
-</header>
+            <div class="admin-login-icon">
+                🔐
+            </div>
 
+            <h1>Admin-Bereich</h1>
 
-<main class="admin-page">
+            <p>
+                Dieser Bereich ist nur für Ausbilder und Administratoren zugänglich.
+            </p>
 
-<div class="admin-container">
+            <div id="loginFehler" class="login-error">
+                E-Mail oder Passwort ist falsch.
+            </div>
 
-    <div class="badge">
-        🔐 ADMIN-BEREICH
-    </div>
+            <form id="adminLoginForm">
 
-    <h1>
-        Prüfungen verwalten
-    </h1>
+                <input
+                    id="adminEmail"
+                    class="admin-input"
+                    type="email"
+                    placeholder="E-Mail"
+                    autocomplete="username"
+                    required
+                >
 
-    <p>
-        Erstelle Prüfungen aus deinem Unterrichtsmaterial
-        und verwalte anschließend die Ergebnisse.
-    </p>
+                <input
+                    id="adminPassword"
+                    class="admin-input"
+                    type="password"
+                    placeholder="Passwort"
+                    autocomplete="current-password"
+                    required
+                >
 
+                <button
+                    type="submit"
+                    class="admin-login-button"
+                >
+                    🔓 Anmelden
+                </button>
 
-    <div class="admin-actions">
+            </form>
 
-        <a
-            href="erstellen.html"
-            class="button primary"
-        >
-            🤖 Prüfung mit KI erstellen
-        </a>
-
-    </div>
-
-
-    <h2 class="section-title">
-        Meine Prüfungen
-    </h2>
-
-
-    <div id="pruefungen">
-
-        <div class="loading">
-            Prüfungen werden geladen...
         </div>
 
     </div>
 
-</div>
 
-</main>
+    <!-- ============================= -->
+    <!-- ADMIN BEREICH -->
+    <!-- ============================= -->
+
+    <main id="adminBereich" class="container">
+
+        <div class="admin-header">
+
+            <div>
+                <h1>🚒 Admin-Bereich</h1>
+
+                <p>
+                    Feuerwehr Prüfungsplattform verwalten
+                </p>
+            </div>
+
+            <div class="admin-header-actions">
+
+                <button
+                    id="neuePruefungButton"
+                    class="admin-button"
+                >
+                    ➕ Prüfung erstellen
+                </button>
+
+                <button
+                    id="ausloggenButton"
+                    class="admin-button secondary"
+                >
+                    🚪 Abmelden
+                </button>
+
+            </div>
+
+        </div>
 
 
-<script src="js/admin.js"></script>
+        <div id="adminStatus" class="admin-status"></div>
+
+
+        <!-- ============================= -->
+        <!-- PRÜFUNGEN -->
+        <!-- ============================= -->
+
+        <section>
+
+            <h2>📚 Prüfungen</h2>
+
+            <div id="pruefungenListe">
+
+                <div class="loading-admin">
+                    Prüfungen werden geladen...
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/admin.js"></script>
 
 </body>
 </html>
+```
