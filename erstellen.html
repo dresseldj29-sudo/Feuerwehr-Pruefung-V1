@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Prüfung erstellen</title>
+    <title>KI-Prüfung erstellen</title>
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -25,7 +25,11 @@
     </div>
 
     <nav>
-        <a href="admin.html">← Admin</a>
+
+        <a href="admin.html">
+            ← Admin
+        </a>
+
     </nav>
 
 </header>
@@ -35,187 +39,268 @@
 
 <div class="admin-container">
 
-<div class="badge">
-    🤖 SCHRITT <span id="stepNumber">1</span> / 5
-</div>
+    <div class="badge">
 
-
-<!-- SCHRITT 1 -->
-
-<section id="step1" class="wizard-step">
-
-    <h1>Prüfung auswählen</h1>
-
-    <p>
-        Welche Prüfung möchtest du erstellen?
-    </p>
-
-    <div class="choice-grid">
-
-        <button onclick="selectType('Feuerwehr-Grundausbildung')">
-            🚒 Feuerwehr-Grundausbildung
-        </button>
-
-        <button onclick="selectType('Funk')">
-            📻 Funk
-        </button>
-
-        <button onclick="selectType('Atemschutz')">
-            😷 Atemschutz
-        </button>
-
-        <button onclick="selectType('Technische Hilfeleistung')">
-            🛠️ Technische Hilfeleistung
-        </button>
-
-        <button onclick="selectType('Eigene Prüfung')">
-            ✏️ Eigene Prüfung
-        </button>
+        🤖 SCHRITT
+        <span id="stepNumber">1</span>
+        / 5
 
     </div>
 
-</section>
 
+    <!-- SCHRITT 1 -->
 
-<!-- SCHRITT 2 -->
-
-<section
-    id="step2"
-    class="wizard-step"
-    style="display:none"
->
-
-    <h1>📚 Unterrichtsmaterial</h1>
-
-    <p>
-        Füge hier dein Unterrichtsmaterial ein.
-    </p>
-
-    <textarea
-        id="material"
-        placeholder="Hier dein Unterrichtsmaterial einfügen..."
-    ></textarea>
-
-    <button
-        class="button primary"
-        onclick="nextStep(3)"
-    >
-        Weiter →
-    </button>
-
-</section>
-
-
-<!-- SCHRITT 3 -->
-
-<section
-    id="step3"
-    class="wizard-step"
-    style="display:none"
->
-
-    <h1>📝 Prüfung einstellen</h1>
-
-    <label>
-        Titel
-    </label>
-
-    <input
-        id="titel"
-        placeholder="z. B. Atemschutz Grundlagen"
+    <section
+        id="step1"
+        class="wizard-step"
     >
 
+        <h1>
+            Welche Prüfung?
+        </h1>
 
-    <label>
-        Anzahl Fragen
-    </label>
+        <p>
+            Wähle zunächst das Thema deiner Prüfung.
+        </p>
 
-    <input
-        id="anzahl"
-        type="number"
-        value="20"
-        min="1"
-        max="100"
+
+        <div class="choice-grid">
+
+            <button
+                onclick="selectType('Feuerwehr-Grundausbildung')"
+            >
+                🚒 Feuerwehr-Grundausbildung
+            </button>
+
+
+            <button
+                onclick="selectType('Funk')"
+            >
+                📻 Feuerwehr-Funk
+            </button>
+
+
+            <button
+                onclick="selectType('Atemschutz')"
+            >
+                😷 Atemschutz
+            </button>
+
+
+            <button
+                onclick="selectType('Technische Hilfeleistung')"
+            >
+                🛠️ Technische Hilfeleistung
+            </button>
+
+
+            <button
+                onclick="selectType('Eigene Prüfung')"
+            >
+                ✏️ Eigene Prüfung
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- SCHRITT 2 -->
+
+    <section
+        id="step2"
+        class="wizard-step"
+        style="display:none"
     >
 
+        <h1>
+            📚 Unterrichtsmaterial
+        </h1>
 
-    <label>
-        Schwierigkeit
-    </label>
-
-    <select id="schwierigkeit">
-
-        <option>Leicht</option>
-        <option selected>Mittel</option>
-        <option>Schwer</option>
-
-    </select>
+        <p>
+            Füge hier dein Unterrichtsmaterial ein.
+            Die KI erstellt die Fragen auf Grundlage
+            dieses Materials.
+        </p>
 
 
-    <label>
-        Bestehensgrenze
-    </label>
+        <textarea
+            id="material"
+            placeholder="Hier dein Unterrichtsmaterial einfügen..."
+        ></textarea>
 
-    <input
-        id="grenze"
-        type="number"
-        value="70"
-        min="1"
-        max="100"
+
+        <button
+            class="button primary"
+            onclick="goToSettings()"
+        >
+            Weiter →
+        </button>
+
+    </section>
+
+
+    <!-- SCHRITT 3 -->
+
+    <section
+        id="step3"
+        class="wizard-step"
+        style="display:none"
     >
 
+        <h1>
+            📝 Prüfung einstellen
+        </h1>
 
-    <button
-        class="button primary"
-        onclick="nextStep(4)"
+
+        <label>
+            Prüfungstitel
+        </label>
+
+        <input
+            id="titel"
+            placeholder="z. B. Atemschutz Grundlagen"
+        >
+
+
+        <label>
+            Anzahl Fragen
+        </label>
+
+        <input
+            id="anzahl"
+            type="number"
+            value="20"
+            min="1"
+            max="100"
+        >
+
+
+        <label>
+            Schwierigkeit
+        </label>
+
+        <select id="schwierigkeit">
+
+            <option value="Leicht">
+                🟢 Leicht
+            </option>
+
+            <option
+                value="Mittel"
+                selected
+            >
+                🟡 Mittel
+            </option>
+
+            <option value="Schwer">
+                🔴 Schwer
+            </option>
+
+        </select>
+
+
+        <label>
+            Bestehensgrenze in %
+        </label>
+
+        <input
+            id="grenze"
+            type="number"
+            value="70"
+            min="1"
+            max="100"
+        >
+
+
+        <label>
+            Zeitlimit in Minuten
+        </label>
+
+        <input
+            id="zeit"
+            type="number"
+            value="30"
+            min="1"
+            max="300"
+        >
+
+
+        <br><br>
+
+
+        <button
+            class="button primary"
+            onclick="showCreateStep()"
+        >
+            Weiter →
+        </button>
+
+    </section>
+
+
+    <!-- SCHRITT 4 -->
+
+    <section
+        id="step4"
+        class="wizard-step"
+        style="display:none"
     >
-        Weiter →
-    </button>
 
-</section>
+        <h1>
+            🤖 Prüfung erstellen
+        </h1>
+
+        <p>
+            Die KI erstellt jetzt deine Prüfung.
+        </p>
 
 
-<!-- SCHRITT 4 -->
+        <div
+            id="aiStatus"
+            class="feature"
+        >
 
-<section
-    id="step4"
-    class="wizard-step"
-    style="display:none"
->
+            <h2>
+                Bereit
+            </h2>
 
-    <h1>🤖 Prüfung erstellen</h1>
+            <p>
+                Klicke auf „Prüfung erstellen“.
+            </p>
 
-    <p>
-        Die KI erstellt jetzt die Fragen aus deinem
-        Unterrichtsmaterial.
-    </p>
+        </div>
 
-    <button
-        class="button primary"
-        onclick="createExam()"
+
+        <button
+            id="createButton"
+            class="button primary"
+            onclick="createExam()"
+        >
+            🤖 Prüfung erstellen
+        </button>
+
+    </section>
+
+
+    <!-- SCHRITT 5 -->
+
+    <section
+        id="step5"
+        class="wizard-step"
+        style="display:none"
     >
-        🤖 Prüfung erstellen
-    </button>
 
-    <div id="aiStatus"></div>
-
-</section>
+        <h1>
+            🎉 Prüfung fertig
+        </h1>
 
 
-<!-- SCHRITT 5 -->
+        <div
+            id="result"
+        ></div>
 
-<section
-    id="step5"
-    class="wizard-step"
-    style="display:none"
->
-
-    <h1>✅ Prüfung fertig</h1>
-
-    <div id="result"></div>
-
-</section>
-
+    </section>
 
 </div>
 
