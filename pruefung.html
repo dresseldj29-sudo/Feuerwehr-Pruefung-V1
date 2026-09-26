@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Prüfung</title>
+    <title>Feuerwehr Prüfung</title>
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -31,15 +31,25 @@
 
 <div class="admin-container">
 
+
+<!-- TEILNEHMER -->
+
 <div id="teilnehmer">
 
     <div class="badge">
-        👨‍🚒 Teilnehmer
+        👨‍🚒 TEILNEHMER
     </div>
+
 
     <h1>
         Prüfung starten
     </h1>
+
+
+    <p>
+        Bitte gib deine Daten ein.
+    </p>
+
 
     <label>
         Vorname
@@ -50,6 +60,7 @@
         placeholder="Vorname"
     >
 
+
     <label>
         Nachname
     </label>
@@ -59,14 +70,19 @@
         placeholder="Nachname"
     >
 
+
     <label>
         Feuerwehr
     </label>
 
     <input
         id="feuerwehr"
-        placeholder="Feuerwehr"
+        placeholder="z. B. Feuerwehr Musterstadt"
     >
+
+
+    <br><br>
+
 
     <button
         class="button primary"
@@ -78,26 +94,80 @@
 </div>
 
 
+<!-- PRÜFUNG -->
+
 <div
     id="exam"
     style="display:none"
 >
 
-    <div id="question"></div>
+    <div class="badge">
 
-    <button
-        class="button secondary"
-        onclick="previousQuestion()"
-    >
-        ← Zurück
-    </button>
+        Frage
+        <span id="questionNumber">
+            1
+        </span>
 
-    <button
-        class="button primary"
-        onclick="nextQuestion()"
+        /
+
+        <span id="questionTotal">
+            0
+        </span>
+
+    </div>
+
+
+    <div class="progress">
+
+        <div
+            id="progressBar"
+            class="progress-bar"
+        ></div>
+
+    </div>
+
+
+    <div
+        id="timer"
+        class="warning"
+        style="
+            font-size:22px;
+            font-weight:bold;
+            margin:20px 0;
+        "
     >
-        Weiter →
-    </button>
+        ⏱ 00:00
+    </div>
+
+
+    <div class="exam-question">
+
+        <div
+            id="question"
+        ></div>
+
+    </div>
+
+
+    <div class="exam-navigation">
+
+        <button
+            class="button secondary"
+            onclick="previousQuestion()"
+        >
+            ← Zurück
+        </button>
+
+
+        <button
+            id="nextButton"
+            class="button primary"
+            onclick="nextQuestion()"
+        >
+            Weiter →
+        </button>
+
+    </div>
 
 </div>
 
