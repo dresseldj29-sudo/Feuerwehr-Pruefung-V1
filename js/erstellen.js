@@ -1,14 +1,22 @@
 const API_URL =
     localStorage.getItem("API_URL") || "";
 
+
 let examData = {
 
     typ: "",
+
     material: "",
+
     titel: "",
+
     anzahl: 20,
+
     schwierigkeit: "Mittel",
-    grenze: 70
+
+    grenze: 70,
+
+    zeit: 30
 
 };
 
@@ -17,12 +25,12 @@ function selectType(type) {
 
     examData.typ = type;
 
-    nextStep(2);
+    showStep(2);
 
 }
 
 
-function nextStep(step) {
+function showStep(step) {
 
     document
         .querySelectorAll(".wizard-step")
@@ -34,40 +42,106 @@ function nextStep(step) {
 
 
     const selected =
-        document.getElementById("step" + step);
+        document.getElementById(
+            "step" + step
+        );
+
 
     if (selected) {
-        selected.style.display = "block";
+
+        selected.style.display =
+            "block";
+
     }
 
 
-    document.getElementById("stepNumber")
+    document
+        .getElementById("stepNumber")
         .textContent = step;
 
+}
 
-    if (step === 3) {
 
-        examData.material =
-            document.getElementById("material").value;
+function goToSettings() {
+
+    const material =
+        document
+            .getElementById("material")
+            .value
+            .trim();
+
+
+    if (!material) {
+
+        alert(
+            "Bitte zuerst Unterrichtsmaterial eingeben."
+        );
+
+        return;
+
+    }
+
+
+    examData.material =
+        material;
+
+
+    showStep(3);
+
+}
+
+
+function showCreateStep() {
+
+    examData.titel =
+        document
+            .getElementById("titel")
+            .value
+            .trim();
+
+
+    examData.anzahl =
+        Number(
+            document
+                .getElementById("anzahl")
+                .value
+        );
+
+
+    examData.schwierigkeit =
+        document
+            .getElementById("schwierigkeit")
+            .value;
+
+
+    examData.grenze =
+        Number(
+            document
+                .getElementById("grenze")
+                .value
+        );
+
+
+    examData.zeit =
+        Number(
+            document
+                .getElementById("zeit")
+                .value
+        );
+
+
+    if (!examData.titel) {
+
+        alert(
+            "Bitte einen Prüfungstitel eingeben."
+        );
+
+        return;
 
     }
 
 
-    if (step === 4) {
-
-        examData.titel =
-            document.getElementById("titel").value;
-
-        examData.anzahl =
-            Number(document.getElementById("anzahl").value);
-
-        examData.schwierigkeit =
-            document.getElementById("schwierigkeit").value;
-
-        examData.grenze =
-            Number(document.getElementById("grenze").value);
-
-    }
+    showStep(4);
 
 }
 
@@ -77,30 +151,23 @@ async function createExam() {
     const status =
         document.getElementById("aiStatus");
 
-    if (!examData.material.trim()) {
-
-        status.innerHTML =
-            "<p>⚠️ Bitte Unterrichtsmaterial eingeben.</p>";
-
-        return;
-
-    }
+    const button =
+        document.getElementById("createButton");
 
 
     if (!API_URL) {
 
         status.innerHTML = `
-            <div class="feature">
 
-                <h2>⚠️ Backend fehlt</h2>
+            <h2>
+                ⚠️ Backend fehlt
+            </h2>
 
-                <p>
-                    Die Website ist fertig eingerichtet.
-                    Jetzt muss noch das Backend verbunden werden,
-                    damit die KI wirklich Prüfungen erstellen kann.
-                </p>
+            <p>
+                Bitte zuerst das Backend einrichten
+                und die Backend-Adresse verbinden.
+            </p>
 
-            </div>
         `;
 
         return;
@@ -108,34 +175,52 @@ async function createExam() {
     }
 
 
+    button.disabled = true;
+
+
     status.innerHTML = `
-        <div class="feature">
 
-            <h2>🤖 Prüfung wird erstellt...</h2>
+        <h2>
+            🤖 KI arbeitet...
+        </h2>
 
-            <p>
-                Unterrichtsmaterial wird analysiert.
-            </p>
+        <p>
+            Unterrichtsmaterial wird analysiert.
+        </p>
 
-        </div>
+        <p>
+            Fragen werden erstellt.
+        </p>
+
+        <p>
+            Antworten werden geprüft.
+        </p>
+
     `;
 
 
     try {
 
-        const response = await fetch(
-            API_URL + "/api/ki/pruefung",
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                API_URL +
+                "/api/ki/pruefung",
+                {
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    method: "POST",
 
-                body: JSON.stringify(examData)
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-            }
-        );
+                    body:
+                        JSON.stringify(
+                            examData
+                        )
+
+                }
+            );
 
 
         const data =
@@ -143,29 +228,16 @@ async function createExam() {
 
 
         if (!response.ok) {
+
             throw new Error(
-                data.error || "Fehler"
+                data.error ||
+                "Fehler bei der KI."
             );
+
         }
 
 
-        document
-            .querySelectorAll(".wizard-step")
-            .forEach(element => {
-
-                element.style.display = "none";
-
-            });
-
-
-        document
-            .getElementById("step5")
-            .style.display = "block";
-
-
-        document
-            .getElementById("stepNumber")
-            .textContent = "5";
+        showStep(5);
 
 
         document
@@ -179,17 +251,49 @@ async function createExam() {
                     </h2>
 
                     <p>
+                        Titel:
+                        <strong>
+                            ${escapeHTML(data.titel)}
+                        </strong>
+                    </p>
+
+                    <p>
+                        Fragen:
                         ${data.questions.length}
-                        Fragen wurden erstellt.
+                    </p>
+
+                    <p>
+                        Prüfungs-Code:
+                        <strong>
+                            ${escapeHTML(data.code)}
+                        </strong>
                     </p>
 
                     <br>
 
-                    <a
+                    <p>
+                        Teilnehmer-Link:
+                    </p>
+
+                    <input
+                        readonly
+                        value="${escapeHTML(data.link)}"
+                    >
+
+                    <br><br>
+
+                    <button
                         class="button primary"
+                        onclick="copyLink('${escapeJS(data.link)}')"
+                    >
+                        📋 Link kopieren
+                    </button>
+
+                    <a
+                        class="button secondary"
                         href="admin.html"
                     >
-                        Zum Admin-Bereich
+                        🔐 Zum Admin-Bereich
                     </a>
 
                 </div>
@@ -199,17 +303,42 @@ async function createExam() {
 
     } catch (error) {
 
+        button.disabled = false;
+
+
         status.innerHTML = `
-            <div class="feature">
 
-                <h2>❌ Fehler</h2>
+            <h2>
+                ❌ Fehler
+            </h2>
 
-                <p>
-                    ${escapeHTML(error.message)}
-                </p>
+            <p>
+                ${escapeHTML(error.message)}
+            </p>
 
-            </div>
         `;
+
+    }
+
+}
+
+
+async function copyLink(link) {
+
+    try {
+
+        await navigator.clipboard.writeText(link);
+
+        alert(
+            "Link wurde kopiert."
+        );
+
+    } catch {
+
+        prompt(
+            "Link kopieren:",
+            link
+        );
 
     }
 
@@ -219,10 +348,30 @@ async function createExam() {
 function escapeHTML(value) {
 
     return String(value)
+
         .replaceAll("&", "&amp;")
+
         .replaceAll("<", "&lt;")
+
         .replaceAll(">", "&gt;")
+
         .replaceAll('"', "&quot;")
+
         .replaceAll("'", "&#039;");
+
+}
+
+
+function escapeJS(value) {
+
+    return String(value)
+
+        .replaceAll("\\", "\\\\")
+
+        .replaceAll("'", "\\'")
+
+        .replaceAll("\n", "\\n")
+
+        .replaceAll("\r", "");
 
 }
