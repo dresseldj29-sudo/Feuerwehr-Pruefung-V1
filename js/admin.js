@@ -1,10 +1,8 @@
 ```javascript
 // ============================================================
 // FEUERWEHR PRÜFUNGSPLATTFORM
-// ADMIN CLIENT
-// ADMIN LOGIN MIT E-MAIL + PASSWORT
+// ADMIN LOGIN
 // ============================================================
-
 
 // ============================================================
 // ADMIN ZUGANGSDATEN
@@ -62,30 +60,24 @@ const adminStatus =
 // LOGIN STATUS
 // ============================================================
 
-let adminAngemeldet =
-    sessionStorage.getItem(
-        "FEUERWEHR_ADMIN_LOGIN"
-    ) === "true";
+let adminAngemeldet = false;
 
 
 // ============================================================
-// START
+// SEITE STARTEN
 // ============================================================
 
 document.addEventListener(
     "DOMContentLoaded",
-    async () => {
+    () => {
 
-        if (adminAngemeldet) {
+        // ----------------------------------------------------
+        // IMMER ZUERST LOGIN ZEIGEN
+        // ----------------------------------------------------
 
-            zeigeAdminBereich();
+        adminAngemeldet = false;
 
-            await ladePruefungen();
-
-        } else {
-
-            zeigeLogin();
-        }
+        zeigeLogin();
     }
 );
 
@@ -100,9 +92,6 @@ loginForm.addEventListener(
 
         event.preventDefault();
 
-        loginFehler.style.display =
-            "none";
-
 
         const email =
             adminEmail.value.trim();
@@ -111,9 +100,17 @@ loginForm.addEventListener(
             adminPassword.value;
 
 
-        // ====================================================
-        // ZUGANGSDATEN PRÜFEN
-        // ====================================================
+        // ----------------------------------------------------
+        // ALTE FEHLERMELDUNG AUSBLENDEN
+        // ----------------------------------------------------
+
+        loginFehler.style.display =
+            "none";
+
+
+        // ----------------------------------------------------
+        // E-MAIL PRÜFEN
+        // ----------------------------------------------------
 
         if (
             email.toLowerCase() !==
@@ -121,12 +118,18 @@ loginForm.addEventListener(
         ) {
 
             zeigeLoginFehler(
-                "E-Mail oder Passwort ist falsch."
+                "❌ Falsche E-Mail-Adresse oder falsches Passwort."
             );
+
+            adminPassword.value = "";
 
             return;
         }
 
+
+        // ----------------------------------------------------
+        // PASSWORT PRÜFEN
+        // ----------------------------------------------------
 
         if (
             password !==
@@ -134,32 +137,34 @@ loginForm.addEventListener(
         ) {
 
             zeigeLoginFehler(
-                "E-Mail oder Passwort ist falsch."
+                "❌ Falsche E-Mail-Adresse oder falsches Passwort."
             );
+
+            adminPassword.value = "";
 
             return;
         }
 
 
-        // ====================================================
+        // ----------------------------------------------------
         // LOGIN ERFOLGREICH
-        // ====================================================
+        // ----------------------------------------------------
 
         adminAngemeldet = true;
 
 
-        sessionStorage.setItem(
-            "FEUERWEHR_ADMIN_LOGIN",
-            "true"
-        );
-
+        // Felder leeren
 
         adminEmail.value = "";
         adminPassword.value = "";
 
 
+        // Admin-Bereich anzeigen
+
         zeigeAdminBereich();
 
+
+        // Prüfungen laden
 
         await ladePruefungen();
     }
@@ -167,10 +172,34 @@ loginForm.addEventListener(
 
 
 // ============================================================
-// ADMIN BEREICH ZEIGEN
+// LOGIN ANZEIGEN
+// ============================================================
+
+function zeigeLogin() {
+
+    adminBereich.style.display =
+        "none";
+
+    loginBereich.style.display =
+        "flex";
+}
+
+
+// ============================================================
+// ADMIN BEREICH ANZEIGEN
 // ============================================================
 
 function zeigeAdminBereich() {
+
+    // Nur anzeigen, wenn wirklich angemeldet
+
+    if (!adminAngemeldet) {
+
+        zeigeLogin();
+
+        return;
+    }
+
 
     loginBereich.style.display =
         "none";
@@ -181,24 +210,12 @@ function zeigeAdminBereich() {
 
 
 // ============================================================
-// LOGIN ZEIGEN
-// ============================================================
-
-function zeigeLogin() {
-
-    loginBereich.style.display =
-        "flex";
-
-    adminBereich.style.display =
-        "none";
-}
-
-
-// ============================================================
 // LOGIN FEHLER
 // ============================================================
 
-function zeigeLoginFehler(text) {
+function zeigeLoginFehler(
+    text
+) {
 
     loginFehler.textContent =
         text;
@@ -216,15 +233,27 @@ ausloggenButton.addEventListener(
     "click",
     () => {
 
+        // Login zurücksetzen
+
         adminAngemeldet = false;
 
 
-        sessionStorage.removeItem(
-            "FEUERWEHR_ADMIN_LOGIN"
-        );
+        // Admin-Bereich sofort verstecken
+
+        adminBereich.style.display =
+            "none";
 
 
-        zeigeLogin();
+        // Login anzeigen
+
+        loginBereich.style.display =
+            "flex";
+
+
+        // Felder leeren
+
+        adminEmail.value = "";
+        adminPassword.value = "";
 
 
         loginFehler.style.display =
@@ -263,6 +292,10 @@ neuePruefungButton.addEventListener(
 // ============================================================
 
 async function ladePruefungen() {
+
+    // --------------------------------------------------------
+    // SICHERHEITSPRÜFUNG
+    // --------------------------------------------------------
 
     if (!adminAngemeldet) {
 
@@ -332,12 +365,20 @@ async function ladePruefungen() {
 
 
 // ============================================================
-// PRÜFUNGEN DARSTELLEN
+// PRÜFUNGEN ANZEIGEN
 // ============================================================
 
 function renderPruefungen(
     pruefungen
 ) {
+
+    if (!adminAngemeldet) {
+
+        zeigeLogin();
+
+        return;
+    }
+
 
     if (!pruefungen.length) {
 
@@ -445,7 +486,6 @@ function renderPruefungen(
                         🔗 Teilnehmer-Link
                     </button>
 
-
                     <button
                         class="admin-button secondary"
                         onclick="oeffneAuswertung('${escapeJs(
@@ -474,6 +514,14 @@ function renderPruefungen(
 function oeffnePruefung(
     code
 ) {
+
+    if (!adminAngemeldet) {
+
+        zeigeLogin();
+
+        return;
+    }
+
 
     const link =
         `${window.location.origin}` +
