@@ -1,11 +1,16 @@
 const API_URL =
     localStorage.getItem("API_URL") || "";
 
+
 const params =
-    new URLSearchParams(window.location.search);
+    new URLSearchParams(
+        window.location.search
+    );
+
 
 const code =
     params.get("code");
+
 
 let exam = null;
 
@@ -13,23 +18,55 @@ let currentQuestion = 0;
 
 let answers = [];
 
+let participant = null;
+
+let timerInterval = null;
+
+let remainingSeconds = 0;
+
 
 async function startExam() {
 
     const vorname =
-        document.getElementById("vorname").value.trim();
+        document
+            .getElementById("vorname")
+            .value
+            .trim();
+
 
     const nachname =
-        document.getElementById("nachname").value.trim();
+        document
+            .getElementById("nachname")
+            .value
+            .trim();
+
 
     const feuerwehr =
-        document.getElementById("feuerwehr").value.trim();
+        document
+            .getElementById("feuerwehr")
+            .value
+            .trim();
 
 
-    if (!vorname || !nachname || !feuerwehr) {
+    if (
+        !vorname ||
+        !nachname ||
+        !feuerwehr
+    ) {
 
         alert(
             "Bitte Vorname, Nachname und Feuerwehr eingeben."
+        );
+
+        return;
+
+    }
+
+
+    if (!code) {
+
+        alert(
+            "Kein Prüfungs-Code vorhanden."
         );
 
         return;
@@ -58,21 +95,45 @@ async function startExam() {
             );
 
 
+        const data =
+            await response.json();
+
+
         if (!response.ok) {
+
             throw new Error(
+                data.error ||
                 "Prüfung nicht gefunden."
             );
+
         }
 
 
-        exam =
-            await response.json();
+        exam = data;
+
+
+        participant = {
+
+            vorname,
+
+            nachname,
+
+            feuerwehr
+
+        };
 
 
         answers =
             new Array(
                 exam.questions.length
             ).fill(null);
+
+
+        currentQuestion = 0;
+
+
+        remainingSeconds =
+            Number(exam.zeitlimit) * 60;
 
 
         document
@@ -85,12 +146,22 @@ async function startExam() {
             .style.display = "block";
 
 
+        document
+            .getElementById("questionTotal")
+            .textContent =
+            exam.questions.length;
+
+
         showQuestion();
+
+        startTimer();
 
 
     } catch (error) {
 
-        alert(error.message);
+        alert(
+            error.message
+        );
 
     }
 
@@ -100,28 +171,55 @@ async function startExam() {
 function showQuestion() {
 
     const q =
-        exam.questions[currentQuestion];
+        exam.questions[
+            currentQuestion
+        ];
+
+
+    document
+        .getElementById("questionNumber")
+        .textContent =
+        currentQuestion + 1;
+
+
+    const percentage =
+        (
+            (currentQuestion + 1) /
+            exam.questions.length
+        ) * 100;
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        percentage + "%";
 
 
     let html = `
 
-        <div class="badge">
-            Frage ${currentQuestion + 1}
-            /
-            ${exam.questions.length}
-        </div>
+        <h1 class="question-title">
 
-        <h1>
             ${escapeHTML(q.question)}
+
         </h1>
 
     `;
 
 
-    if (q.type === "multiple") {
+    if (
+        q.type === "multiple"
+    ) {
 
         q.options.forEach(
             (option, index) => {
+
+                const checked =
+                    answers[
+                        currentQuestion
+                    ] === index
+                        ? "checked"
+                        : "";
+
 
                 html += `
 
@@ -131,9 +229,7 @@ function showQuestion() {
                             type="radio"
                             name="answer"
                             value="${index}"
-                            ${answers[currentQuestion] === index
-                                ? "checked"
-                                : ""}
+                            ${checked}
                             onchange="saveAnswer(${index})"
                         >
 
@@ -149,7 +245,15 @@ function showQuestion() {
     }
 
 
-    if (q.type === "truefalse") {
+    if (
+        q.type === "truefalse"
+    ) {
+
+        const answer =
+            answers[
+                currentQuestion
+            ];
+
 
         html += `
 
@@ -159,6 +263,7 @@ function showQuestion() {
                     type="radio"
                     name="answer"
                     value="true"
+                    ${answer === true ? "checked" : ""}
                     onchange="saveAnswer(true)"
                 >
 
@@ -173,6 +278,7 @@ function showQuestion() {
                     type="radio"
                     name="answer"
                     value="false"
+                    ${answer === false ? "checked" : ""}
                     onchange="saveAnswer(false)"
                 >
 
@@ -185,7 +291,9 @@ function showQuestion() {
     }
 
 
-    if (q.type === "text") {
+    if (
+        q.type === "text"
+    ) {
 
         html += `
 
@@ -193,32 +301,59 @@ function showQuestion() {
                 id="textAnswer"
                 placeholder="Deine Antwort..."
                 oninput="saveTextAnswer()"
-            >${answers[currentQuestion] || ""}</textarea>
+            >${escapeHTML(
+                answers[currentQuestion] || ""
+            )}</textarea>
 
         `;
 
     }
 
 
-    document.getElementById("question")
+    document
+        .getElementById("question")
         .innerHTML = html;
+
+
+    const button =
+        document.getElementById(
+            "nextButton"
+        );
+
+
+    button.textContent =
+        currentQuestion ===
+        exam.questions.length - 1
+            ? "Prüfung abgeben"
+            : "Weiter →";
 
 }
 
 
 function saveAnswer(answer) {
 
-    answers[currentQuestion] =
-        answer;
+    answers[
+        currentQuestion
+    ] = answer;
 
 }
 
 
 function saveTextAnswer() {
 
-    answers[currentQuestion] =
-        document.getElementById("textAnswer")
-            .value;
+    const element =
+        document.getElementById(
+            "textAnswer"
+        );
+
+
+    if (element) {
+
+        answers[
+            currentQuestion
+        ] = element.value;
+
+    }
 
 }
 
@@ -234,6 +369,11 @@ function nextQuestion() {
 
         showQuestion();
 
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
     } else {
 
         submitExam();
@@ -245,7 +385,9 @@ function nextQuestion() {
 
 function previousQuestion() {
 
-    if (currentQuestion > 0) {
+    if (
+        currentQuestion > 0
+    ) {
 
         currentQuestion--;
 
@@ -256,40 +398,141 @@ function previousQuestion() {
 }
 
 
-async function submitExam() {
+function startTimer() {
 
-    if (!confirm(
-        "Prüfung wirklich abgeben?"
-    )) {
+    updateTimer();
 
-        return;
+
+    timerInterval =
+        setInterval(() => {
+
+            remainingSeconds--;
+
+            updateTimer();
+
+
+            if (
+                remainingSeconds <= 0
+            ) {
+
+                clearInterval(
+                    timerInterval
+                );
+
+
+                alert(
+                    "Die Prüfungszeit ist abgelaufen."
+                );
+
+
+                submitExam(
+                    true
+                );
+
+            }
+
+        }, 1000);
+
+}
+
+
+function updateTimer() {
+
+    const minutes =
+        Math.floor(
+            remainingSeconds / 60
+        );
+
+
+    const seconds =
+        remainingSeconds % 60;
+
+
+    document
+        .getElementById("timer")
+        .textContent =
+        "⏱ " +
+        String(minutes)
+            .padStart(2, "0") +
+        ":" +
+        String(seconds)
+            .padStart(2, "0");
+
+
+    if (
+        remainingSeconds <= 60
+    ) {
+
+        document
+            .getElementById("timer")
+            .className =
+            "danger";
+
+    }
+
+}
+
+
+async function submitExam(
+    automatic = false
+) {
+
+    if (!automatic) {
+
+        const unanswered =
+            answers.filter(
+                answer =>
+                    answer === null ||
+                    answer === undefined ||
+                    answer === ""
+            ).length;
+
+
+        if (unanswered > 0) {
+
+            const confirmResult =
+                confirm(
+                    "Du hast noch " +
+                    unanswered +
+                    " unbeantwortete Frage(n). Trotzdem abgeben?"
+                );
+
+
+            if (!confirmResult) {
+
+                return;
+
+            }
+
+        }
+
+
+        if (
+            !confirm(
+                "Prüfung wirklich abgeben?"
+            )
+        ) {
+
+            return;
+
+        }
 
     }
 
 
-    const participant = {
-
-        vorname:
-            document.getElementById("vorname").value,
-
-        nachname:
-            document.getElementById("nachname").value,
-
-        feuerwehr:
-            document.getElementById("feuerwehr").value,
-
-        code,
-        answers
-
-    };
+    clearInterval(
+        timerInterval
+    );
 
 
     try {
 
         const response =
             await fetch(
-                API_URL + "/api/teilnehmer/abgabe",
+                API_URL +
+                "/api/teilnehmer/abgabe",
                 {
+
                     method: "POST",
 
                     headers: {
@@ -298,7 +541,23 @@ async function submitExam() {
                     },
 
                     body:
-                        JSON.stringify(participant)
+                        JSON.stringify({
+
+                            code,
+
+                            vorname:
+                                participant.vorname,
+
+                            nachname:
+                                participant.nachname,
+
+                            feuerwehr:
+                                participant.feuerwehr,
+
+                            answers
+
+                        })
+
                 }
             );
 
@@ -308,20 +567,27 @@ async function submitExam() {
 
 
         if (!response.ok) {
+
             throw new Error(
-                data.error || "Fehler"
+                data.error ||
+                "Fehler bei der Abgabe."
             );
+
         }
 
 
         window.location.href =
             "ergebnis.html?id=" +
-            encodeURIComponent(data.id);
+            encodeURIComponent(
+                data.id
+            );
 
 
     } catch (error) {
 
-        alert(error.message);
+        alert(
+            error.message
+        );
 
     }
 
@@ -331,10 +597,30 @@ async function submitExam() {
 function escapeHTML(value) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
