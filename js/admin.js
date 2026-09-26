@@ -2,6 +2,20 @@
 // ============================================================
 // FEUERWEHR PRÜFUNGSPLATTFORM
 // ADMIN CLIENT
+// ADMIN LOGIN MIT E-MAIL + PASSWORT
+// ============================================================
+
+
+// ============================================================
+// ADMIN ZUGANGSDATEN
+// ============================================================
+
+const OWNER_EMAIL = "Ausbilder@gmail.com";
+const OWNER_PASSWORD = "Admin";
+
+
+// ============================================================
+// API
 // ============================================================
 
 const API_URL =
@@ -13,15 +27,23 @@ const API_URL =
 // ELEMENTE
 // ============================================================
 
-const loginBereich = document.getElementById("loginBereich");
-const adminBereich = document.getElementById("adminBereich");
+const loginBereich =
+    document.getElementById("loginBereich");
 
-const loginForm = document.getElementById("adminLoginForm");
+const adminBereich =
+    document.getElementById("adminBereich");
 
-const adminEmail = document.getElementById("adminEmail");
-const adminPassword = document.getElementById("adminPassword");
+const loginForm =
+    document.getElementById("adminLoginForm");
 
-const loginFehler = document.getElementById("loginFehler");
+const adminEmail =
+    document.getElementById("adminEmail");
+
+const adminPassword =
+    document.getElementById("adminPassword");
+
+const loginFehler =
+    document.getElementById("loginFehler");
 
 const ausloggenButton =
     document.getElementById("ausloggenButton");
@@ -37,93 +59,68 @@ const adminStatus =
 
 
 // ============================================================
-// TOKEN
+// LOGIN STATUS
 // ============================================================
 
-let adminToken =
-    sessionStorage.getItem("FEUERWEHR_ADMIN_TOKEN");
+let adminAngemeldet =
+    sessionStorage.getItem(
+        "FEUERWEHR_ADMIN_LOGIN"
+    ) === "true";
 
 
 // ============================================================
 // START
 // ============================================================
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    if (adminToken) {
-
-        const gueltig = await pruefeAdminToken();
-
-        if (gueltig) {
+        if (adminAngemeldet) {
 
             zeigeAdminBereich();
 
             await ladePruefungen();
 
-            return;
+        } else {
+
+            zeigeLogin();
         }
-
-        sessionStorage.removeItem("FEUERWEHR_ADMIN_TOKEN");
-        adminToken = null;
     }
-
-    zeigeLogin();
-});
+);
 
 
 // ============================================================
 // LOGIN
 // ============================================================
 
-loginForm.addEventListener("submit", async (event) => {
+loginForm.addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    loginFehler.style.display = "none";
-
-    const email =
-        adminEmail.value.trim();
-
-    const password =
-        adminPassword.value;
+        loginFehler.style.display =
+            "none";
 
 
-    if (!email || !password) {
+        const email =
+            adminEmail.value.trim();
 
-        zeigeLoginFehler(
-            "Bitte E-Mail und Passwort eingeben."
-        );
-
-        return;
-    }
+        const password =
+            adminPassword.value;
 
 
-    try {
+        // ====================================================
+        // ZUGANGSDATEN PRÜFEN
+        // ====================================================
 
-        const response = await fetch(
-            `${API_URL}/api/admin/login`,
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            }
-        );
-
-
-        const data = await response.json();
-
-
-        if (!response.ok) {
+        if (
+            email.toLowerCase() !==
+            OWNER_EMAIL.toLowerCase()
+        ) {
 
             zeigeLoginFehler(
-                data.error ||
                 "E-Mail oder Passwort ist falsch."
             );
 
@@ -131,21 +128,29 @@ loginForm.addEventListener("submit", async (event) => {
         }
 
 
-        if (!data.token) {
+        if (
+            password !==
+            OWNER_PASSWORD
+        ) {
 
             zeigeLoginFehler(
-                "Der Server hat kein Login-Token zurückgegeben."
+                "E-Mail oder Passwort ist falsch."
             );
 
             return;
         }
 
 
-        adminToken = data.token;
+        // ====================================================
+        // LOGIN ERFOLGREICH
+        // ====================================================
+
+        adminAngemeldet = true;
+
 
         sessionStorage.setItem(
-            "FEUERWEHR_ADMIN_TOKEN",
-            adminToken
+            "FEUERWEHR_ADMIN_LOGIN",
+            "true"
         );
 
 
@@ -155,50 +160,10 @@ loginForm.addEventListener("submit", async (event) => {
 
         zeigeAdminBereich();
 
+
         await ladePruefungen();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        zeigeLoginFehler(
-            "Der Server ist nicht erreichbar."
-        );
     }
-});
-
-
-// ============================================================
-// TOKEN PRÜFEN
-// ============================================================
-
-async function pruefeAdminToken() {
-
-    try {
-
-        const response = await fetch(
-            `${API_URL}/api/admin/me`,
-            {
-                method: "GET",
-
-                headers: {
-                    "Authorization":
-                        `Bearer ${adminToken}`
-                }
-            }
-        );
-
-
-        return response.ok;
-
-    } catch (error) {
-
-        console.error(error);
-
-        return false;
-    }
-}
+);
 
 
 // ============================================================
@@ -207,9 +172,11 @@ async function pruefeAdminToken() {
 
 function zeigeAdminBereich() {
 
-    loginBereich.style.display = "none";
+    loginBereich.style.display =
+        "none";
 
-    adminBereich.style.display = "block";
+    adminBereich.style.display =
+        "block";
 }
 
 
@@ -219,9 +186,11 @@ function zeigeAdminBereich() {
 
 function zeigeLogin() {
 
-    loginBereich.style.display = "flex";
+    loginBereich.style.display =
+        "flex";
 
-    adminBereich.style.display = "none";
+    adminBereich.style.display =
+        "none";
 }
 
 
@@ -231,9 +200,11 @@ function zeigeLogin() {
 
 function zeigeLoginFehler(text) {
 
-    loginFehler.textContent = text;
+    loginFehler.textContent =
+        text;
 
-    loginFehler.style.display = "block";
+    loginFehler.style.display =
+        "block";
 }
 
 
@@ -243,17 +214,22 @@ function zeigeLoginFehler(text) {
 
 ausloggenButton.addEventListener(
     "click",
-    async () => {
+    () => {
 
-        adminToken = null;
+        adminAngemeldet = false;
+
 
         sessionStorage.removeItem(
-            "FEUERWEHR_ADMIN_TOKEN"
+            "FEUERWEHR_ADMIN_LOGIN"
         );
+
 
         zeigeLogin();
 
-        loginFehler.style.display = "none";
+
+        loginFehler.style.display =
+            "none";
+
 
         adminEmail.focus();
     }
@@ -268,6 +244,14 @@ neuePruefungButton.addEventListener(
     "click",
     () => {
 
+        if (!adminAngemeldet) {
+
+            zeigeLogin();
+
+            return;
+        }
+
+
         window.location.href =
             "erstellen.html";
     }
@@ -280,6 +264,14 @@ neuePruefungButton.addEventListener(
 
 async function ladePruefungen() {
 
+    if (!adminAngemeldet) {
+
+        zeigeLogin();
+
+        return;
+    }
+
+
     pruefungenListe.innerHTML = `
         <div class="loading-admin">
             Prüfungen werden geladen...
@@ -289,28 +281,14 @@ async function ladePruefungen() {
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/api/pruefungen`,
-            {
-                method: "GET",
-
-                headers: {
-                    "Authorization":
-                        `Bearer ${adminToken}`
-                }
-            }
-        );
+        const response =
+            await fetch(
+                `${API_URL}/api/pruefungen`
+            );
 
 
-        if (response.status === 401) {
-
-            adminTokenAbgelaufen();
-
-            return;
-        }
-
-
-        const data = await response.json();
+        const data =
+            await response.json();
 
 
         if (!response.ok) {
@@ -328,18 +306,22 @@ async function ladePruefungen() {
                 : data.pruefungen || [];
 
 
-        renderPruefungen(pruefungen);
+        renderPruefungen(
+            pruefungen
+        );
 
 
     } catch (error) {
 
         console.error(error);
 
+
         pruefungenListe.innerHTML = `
             <div class="empty-admin">
                 ❌ Prüfungen konnten nicht geladen werden.
             </div>
         `;
+
 
         zeigeAdminStatus(
             error.message,
@@ -353,14 +335,18 @@ async function ladePruefungen() {
 // PRÜFUNGEN DARSTELLEN
 // ============================================================
 
-function renderPruefungen(pruefungen) {
+function renderPruefungen(
+    pruefungen
+) {
 
     if (!pruefungen.length) {
 
         pruefungenListe.innerHTML = `
             <div class="empty-admin">
 
-                <h3>Noch keine Prüfungen vorhanden.</h3>
+                <h3>
+                    Noch keine Prüfungen vorhanden.
+                </h3>
 
                 <p>
                     Erstelle deine erste Feuerwehr-Prüfung
@@ -374,90 +360,110 @@ function renderPruefungen(pruefungen) {
     }
 
 
-    pruefungenListe.innerHTML = "";
+    pruefungenListe.innerHTML =
+        "";
 
 
-    pruefungen.forEach((pruefung) => {
+    pruefungen.forEach(
+        (pruefung) => {
 
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "admin-card";
-
-
-        const erstellt =
-            pruefung.created_at
-                ? new Date(
-                    pruefung.created_at
-                ).toLocaleString("de-DE")
-                : "Unbekannt";
-
-
-        const frageAnzahl =
-            pruefung.questions
-                ? pruefung.questions.length
-                : (
-                    pruefung.fragenanzahl ||
-                    pruefung.question_count ||
-                    0
+            const card =
+                document.createElement(
+                    "div"
                 );
 
 
-        const code =
-            pruefung.code ||
-            pruefung.pruefungscode ||
-            "";
+            card.className =
+                "admin-card";
 
 
-        card.innerHTML = `
-
-            <h3>
-                🚒 ${escapeHtml(
-                    pruefung.title ||
-                    "Unbenannte Prüfung"
-                )}
-            </h3>
-
-            <div class="admin-card-info">
-                🔑 Prüfungscode:
-                <strong>${escapeHtml(code)}</strong>
-            </div>
-
-            <div class="admin-card-info">
-                ❓ Fragen:
-                ${frageAnzahl}
-            </div>
-
-            <div class="admin-card-info">
-                📅 Erstellt:
-                ${escapeHtml(erstellt)}
-            </div>
-
-            <div class="admin-card-actions">
-
-                <button
-                    class="admin-button"
-                    onclick="oeffnePruefung('${escapeJs(code)}')"
-                >
-                    🔗 Teilnehmer-Link
-                </button>
-
-                <button
-                    class="admin-button secondary"
-                    onclick="oeffneAuswertung('${escapeJs(
-                        pruefung.id || code
-                    )}')"
-                >
-                    📊 Auswertung
-                </button>
-
-            </div>
-        `;
+            const erstellt =
+                pruefung.created_at
+                    ? new Date(
+                        pruefung.created_at
+                    ).toLocaleString(
+                        "de-DE"
+                    )
+                    : "Unbekannt";
 
 
-        pruefungenListe.appendChild(card);
-    });
+            const frageAnzahl =
+                pruefung.questions
+                    ? pruefung.questions.length
+                    : (
+                        pruefung.fragenanzahl ||
+                        pruefung.question_count ||
+                        0
+                    );
+
+
+            const code =
+                pruefung.code ||
+                pruefung.pruefungscode ||
+                "";
+
+
+            card.innerHTML = `
+
+                <h3>
+                    🚒 ${escapeHtml(
+                        pruefung.title ||
+                        "Unbenannte Prüfung"
+                    )}
+                </h3>
+
+                <div class="admin-card-info">
+
+                    🔑 Prüfungscode:
+
+                    <strong>
+                        ${escapeHtml(code)}
+                    </strong>
+
+                </div>
+
+                <div class="admin-card-info">
+
+                    ❓ Fragen:
+                    ${frageAnzahl}
+
+                </div>
+
+                <div class="admin-card-info">
+
+                    📅 Erstellt:
+                    ${escapeHtml(erstellt)}
+
+                </div>
+
+                <div class="admin-card-actions">
+
+                    <button
+                        class="admin-button"
+                        onclick="oeffnePruefung('${escapeJs(code)}')"
+                    >
+                        🔗 Teilnehmer-Link
+                    </button>
+
+
+                    <button
+                        class="admin-button secondary"
+                        onclick="oeffneAuswertung('${escapeJs(
+                            pruefung.id || code
+                        )}')"
+                    >
+                        📊 Auswertung
+                    </button>
+
+                </div>
+            `;
+
+
+            pruefungenListe.appendChild(
+                card
+            );
+        }
+    );
 }
 
 
@@ -465,7 +471,9 @@ function renderPruefungen(pruefungen) {
 // TEILNEHMER-LINK
 // ============================================================
 
-function oeffnePruefung(code) {
+function oeffnePruefung(
+    code
+) {
 
     const link =
         `${window.location.origin}` +
@@ -473,26 +481,43 @@ function oeffnePruefung(code) {
             "admin.html",
             "pruefung.html"
         )}` +
-        `?code=${encodeURIComponent(code)}`;
+        `?code=${encodeURIComponent(
+            code
+        )}`;
 
 
-    navigator.clipboard
-        .writeText(link)
-        .then(() => {
+    if (
+        navigator.clipboard
+    ) {
 
-            zeigeAdminStatus(
-                `Teilnehmer-Link kopiert: ${link}`,
-                "success"
+        navigator.clipboard
+            .writeText(link)
+            .then(
+                () => {
+
+                    zeigeAdminStatus(
+                        `Teilnehmer-Link kopiert: ${link}`,
+                        "success"
+                    );
+                }
+            )
+            .catch(
+                () => {
+
+                    prompt(
+                        "Teilnehmer-Link:",
+                        link
+                    );
+                }
             );
 
-        })
-        .catch(() => {
+    } else {
 
-            prompt(
-                "Teilnehmer-Link:",
-                link
-            );
-        });
+        prompt(
+            "Teilnehmer-Link:",
+            link
+        );
+    }
 }
 
 
@@ -500,30 +525,22 @@ function oeffnePruefung(code) {
 // AUSWERTUNG
 // ============================================================
 
-function oeffneAuswertung(id) {
+function oeffneAuswertung(
+    id
+) {
+
+    if (!adminAngemeldet) {
+
+        zeigeLogin();
+
+        return;
+    }
+
 
     window.location.href =
-        `auswertung.html?id=${encodeURIComponent(id)}`;
-}
-
-
-// ============================================================
-// TOKEN ABGELAUFEN
-// ============================================================
-
-function adminTokenAbgelaufen() {
-
-    adminToken = null;
-
-    sessionStorage.removeItem(
-        "FEUERWEHR_ADMIN_TOKEN"
-    );
-
-    zeigeLogin();
-
-    zeigeLoginFehler(
-        "Deine Anmeldung ist nicht mehr gültig. Bitte erneut anmelden."
-    );
+        `auswertung.html?id=${encodeURIComponent(
+            id
+        )}`;
 }
 
 
@@ -531,20 +548,27 @@ function adminTokenAbgelaufen() {
 // STATUS
 // ============================================================
 
-function zeigeAdminStatus(text, type) {
+function zeigeAdminStatus(
+    text,
+    type
+) {
 
-    adminStatus.textContent = text;
+    adminStatus.textContent =
+        text;
 
     adminStatus.className =
         `admin-status ${type}`;
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        adminStatus.className =
-            "admin-status";
+            adminStatus.className =
+                "admin-status";
 
-    }, 6000);
+        },
+        6000
+    );
 }
 
 
@@ -552,14 +576,31 @@ function zeigeAdminStatus(text, type) {
 // HTML SICHER MACHEN
 // ============================================================
 
-function escapeHtml(value) {
+function escapeHtml(
+    value
+) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
@@ -567,13 +608,30 @@ function escapeHtml(value) {
 // JAVASCRIPT SICHER MACHEN
 // ============================================================
 
-function escapeJs(value) {
+function escapeJs(
+    value
+) {
 
     return String(value)
-        .replaceAll("\\", "\\\\")
-        .replaceAll("'", "\\'")
-        .replaceAll('"', '\\"')
-        .replaceAll("\n", "\\n")
-        .replaceAll("\r", "\\r");
+        .replaceAll(
+            "\\",
+            "\\\\"
+        )
+        .replaceAll(
+            "'",
+            "\\'"
+        )
+        .replaceAll(
+            '"',
+            '\\"'
+        )
+        .replaceAll(
+            "\n",
+            "\\n"
+        )
+        .replaceAll(
+            "\r",
+            "\\r"
+        );
 }
 ```
