@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Auswertung</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        🚒 Prüfungs-Auswertung
+    </div>
+
+    <nav>
+
+        <a href="admin.html">
+            ← Admin
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="admin-page">
+
+<div class="admin-container">
+
+    <div class="badge">
+        📊 AUSWERTUNG
+    </div>
+
+
+    <h1>
+        Prüfungsergebnisse
+    </h1>
+
+
+    <div id="stats">
+
+        Wird geladen...
+
+    </div>
+
+
+    <div id="participants">
+
+        Wird geladen...
+
+    </div>
+
+</div>
+
+</main>
+
+
+<script>
+
+const API_URL =
+    localStorage.getItem("API_URL") || "";
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const examId =
+    params.get("id");
+
+
+async function loadData() {
+
+    if (!API_URL) {
+
+        document
+            .getElementById("stats")
+            .innerHTML =
+            "<div class='feature'>Backend nicht verbunden.</div>";
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL +
+                "/api/auswertung/" +
+                encodeURIComponent(examId)
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Fehler"
+            );
+
+        }
+
+
+        document
+            .getElementById("stats")
+            .innerHTML = `
+
+                <div class="features">
+
+                    <div class="feature">
+
+                        <h2>
+                            Teilnehmer
+                        </h2>
+
+                        <div class="result-big">
+                            ${data.stats.teilnehmer}
+                        </div>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <h2>
+                            Durchschnitt
+                        </h2>
+
+                        <div class="result-big">
+                            ${data.stats.durchschnitt} %
+                        </div>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <h2>
+                            Bestanden
+                        </h2>
+
+                        <div class="result-big">
+                            ${data.stats.bestanden}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+        if (!data.teilnehmer.length) {
+
+            document
+                .getElementById("participants")
+                .innerHTML = `
+
+                    <div class="feature">
+
+                        Noch keine Teilnehmer.
+
+                    </div>
+
+                `;
+
+            return;
+
+        }
+
+
+        let html = `
+
+            <div class="feature">
+
+                <h2>
+                    Teilnehmer
+                </h2>
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Name
+                            </th>
+
+                            <th>
+                                Feuerwehr
+                            </th>
+
+                            <th>
+                                Punkte
+                            </th>
+
+                            <th>
+                                Ergebnis
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+        `;
+
+
+        data.teilnehmer.forEach(
+            person => {
+
+                html += `
+
+                    <tr>
+
+                        <td>
+
+                            ${escapeHTML(
+                                person.vorname
+                            )}
+
+                            ${escapeHTML(
+                                person.nachname
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            ${escapeHTML(
+                                person.feuerwehr
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            ${person.punkte}
+                            /
+                            ${person.max_punkte}
+
+                        </td>
+
+
+                        <td>
+
+                            <strong
+                                class="${
+                                    person.bestanden
+                                        ? "success"
+                                        : "danger"
+                                }"
+                            >
+
+                                ${person.prozent} %
+
+                            </strong>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        );
+
+
+        html += `
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        `;
+
+
+        document
+            .getElementById("participants")
+            .innerHTML = html;
+
+
+    } catch (error) {
+
+        document
+            .getElementById("stats")
+            .innerHTML = `
+
+                <div class="feature">
+
+                    ❌ ${escapeHTML(
+                        error.message
+                    )}
+
+                </div>
+
+            `;
+
+    }
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+loadData();
+
+</script>
+
+</body>
+</html>
