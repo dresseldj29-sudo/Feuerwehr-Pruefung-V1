@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Prüfung</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        🚒 Feuerwehr Prüfung
+    </div>
+
+</header>
+
+
+<main class="admin-page">
+
+<div class="admin-container">
+
+<div id="teilnehmer">
+
+    <div class="badge">
+        👨‍🚒 Teilnehmer
+    </div>
+
+    <h1>
+        Prüfung starten
+    </h1>
+
+    <label>
+        Vorname
+    </label>
+
+    <input
+        id="vorname"
+        placeholder="Vorname"
+    >
+
+    <label>
+        Nachname
+    </label>
+
+    <input
+        id="nachname"
+        placeholder="Nachname"
+    >
+
+    <label>
+        Feuerwehr
+    </label>
+
+    <input
+        id="feuerwehr"
+        placeholder="Feuerwehr"
+    >
+
+    <button
+        class="button primary"
+        onclick="startExam()"
+    >
+        Prüfung starten →
+    </button>
+
+</div>
+
+
+<div
+    id="exam"
+    style="display:none"
+>
+
+    <div id="question"></div>
+
+    <button
+        class="button secondary"
+        onclick="previousQuestion()"
+    >
+        ← Zurück
+    </button>
+
+    <button
+        class="button primary"
+        onclick="nextQuestion()"
+    >
+        Weiter →
+    </button>
+
+</div>
+
+
+</div>
+
+</main>
+
+
+<script src="js/pruefung.js"></script>
+
+</body>
+</html>
