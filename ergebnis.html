@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 
 <head>
@@ -37,8 +36,9 @@
     </div>
 
     <h1>
-        Deine Prüfung
+        Prüfung abgeschlossen
     </h1>
+
 
     <div
         id="result"
@@ -57,8 +57,12 @@
 const API_URL =
     localStorage.getItem("API_URL") || "";
 
+
 const params =
-    new URLSearchParams(window.location.search);
+    new URLSearchParams(
+        window.location.search
+    );
+
 
 const id =
     params.get("id");
@@ -68,7 +72,8 @@ async function loadResult() {
 
     if (!API_URL) {
 
-        document.getElementById("result")
+        document
+            .getElementById("result")
             .innerHTML =
             "Backend nicht verbunden.";
 
@@ -77,54 +82,116 @@ async function loadResult() {
     }
 
 
-    const response =
-        await fetch(
-            API_URL +
-            "/api/teilnehmer/" +
-            encodeURIComponent(id)
-        );
+    try {
+
+        const response =
+            await fetch(
+                API_URL +
+                "/api/teilnehmer/" +
+                encodeURIComponent(id)
+            );
 
 
-    const data =
-        await response.json();
+        const data =
+            await response.json();
 
 
-    document.getElementById("result")
-        .innerHTML = `
+        if (!response.ok) {
 
-            <h2>
-                ${escapeHTML(data.vorname)}
-                ${escapeHTML(data.nachname)}
-            </h2>
+            throw new Error(
+                data.error ||
+                "Fehler"
+            );
 
-            <p>
-                Feuerwehr:
-                ${escapeHTML(data.feuerwehr)}
-            </p>
+        }
 
-            <br>
 
-            <h1>
-                ${data.prozent} %
-            </h1>
+        document
+            .getElementById("result")
+            .innerHTML = `
 
-            <p>
-                ${data.punkte}
-                / ${data.maxPunkte}
-                Punkte
-            </p>
+                <h2>
 
-            <br>
+                    ${escapeHTML(
+                        data.vorname
+                    )}
 
-            <h2>
-                ${
-                    data.bestanden
-                    ? "🟢 BESTANDEN"
-                    : "🔴 NICHT BESTANDEN"
-                }
-            </h2>
+                    ${escapeHTML(
+                        data.nachname
+                    )}
 
-        `;
+                </h2>
+
+
+                <p>
+
+                    Feuerwehr:
+
+                    ${escapeHTML(
+                        data.feuerwehr
+                    )}
+
+                </p>
+
+
+                <div class="result-big">
+
+                    ${data.prozent} %
+
+                </div>
+
+
+                <p>
+
+                    ${data.punkte}
+                    /
+                    ${data.maxPunkte}
+                    Punkte
+
+                </p>
+
+
+                <br>
+
+
+                <h2
+                    class="${
+                        data.bestanden
+                            ? "success"
+                            : "danger"
+                    }"
+                >
+
+                    ${
+                        data.bestanden
+                            ? "🟢 BESTANDEN"
+                            : "🔴 NICHT BESTANDEN"
+                    }
+
+                </h2>
+
+            `;
+
+
+    } catch (error) {
+
+        document
+            .getElementById("result")
+            .innerHTML = `
+
+                <h2>
+                    ❌ Fehler
+                </h2>
+
+                <p>
+                    ${escapeHTML(
+                        error.message
+                    )}
+                </p>
+
+            `;
+
+    }
 
 }
 
@@ -132,11 +199,31 @@ async function loadResult() {
 function escapeHTML(value) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
