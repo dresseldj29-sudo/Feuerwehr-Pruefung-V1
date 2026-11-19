@@ -119,7 +119,7 @@ app.post("/api/attempts/:id/submit", (req,res) => {
  if(!exam) return res.status(404).json({error:"Prüfung nicht gefunden."});
  const questions=JSON.parse(exam.questions), answers=Array.isArray(req.body?.answers)?req.body.answers:[];
  let points=0;
- const details=questions.map((q,i)=>{const a=Number(answers[i]);const correct=Number.isInteger(a)&&a===q.answer;if(correct)points++;return {question:q.question,selected:Number.isInteger(a)?a:null,correctAnswer:q.answer,correct};});
+ const details=questions.map((q,i)=>{const raw=answers[i];const a=raw===null||raw===undefined||raw===""?-1:Number(raw);const correct=Number.isInteger(a)&&a===q.answer;if(correct)points++;return {question:q.question,selected:Number.isInteger(a)&&a>=0?a:null,correctAnswer:q.answer,correct};});
  const max=questions.length, percent=Math.round(points/max*100), passed=percent>=exam.pass_percent, submitted=new Date().toISOString();
  db.prepare("UPDATE attempts SET answers=?,points=?,max_points=?,percent=?,passed=?,submitted_at=? WHERE id=?")
  .run(JSON.stringify(details),points,max,percent,passed?1:0,submitted,attempt.id);
