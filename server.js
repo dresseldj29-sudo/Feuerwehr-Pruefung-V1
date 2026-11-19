@@ -38,6 +38,7 @@ app.use(session({
  resave: false, saveUninitialized: false,
  cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 8 * 60 * 60 * 1000 }
 }));
+app.use("/data", (req,res) => res.sendStatus(404));
 app.use(express.static(__dirname));
 const adminUser = process.env.ADMIN_USERNAME || "ausbilder";
 const adminPassword = process.env.ADMIN_PASSWORD || "";
