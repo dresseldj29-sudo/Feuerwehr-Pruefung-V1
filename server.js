@@ -1,6 +1,7 @@
 "use strict";
 const express = require("express");
 const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 const helmet = require("helmet");
 const bcrypt = require("bcryptjs");
 const Database = require("better-sqlite3");
@@ -11,6 +12,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.mkdirSync(path.join(DATA_DIR, "sessions"), { recursive: true });
 const db = new Database(path.join(DATA_DIR, "feuerwehr-pruefung.sqlite"));
 db.pragma("journal_mode = WAL");
 db.exec(`
@@ -34,6 +36,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(session({
+ store: new FileStore({ path: path.join(DATA_DIR, "sessions"), ttl: 8 * 60 * 60, retries: 0 }),
  secret: process.env.SESSION_SECRET || "change-this-session-secret-before-production",
  resave: false, saveUninitialized: false,
  cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 8 * 60 * 60 * 1000 }
